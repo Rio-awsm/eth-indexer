@@ -5,7 +5,7 @@ import { mnemonicToSeedSync } from "bip39";
 import { MNEUMONICS } from "./config";
 
 const client = new Client(
-  "postgresql://neondb_owner:xxxxxxxxxxxxxxx@ep-young-heart-a87gqpay-pooler.eastus2.azure.neon.tech/neondb?sslmode=require"
+  "postgresql://neondb_owner:*********@ep-young-heart-a87gqpay-pooler.eastus2.azure.neon.tech/neondb?sslmode=require"
 );
 client.connect();
 
@@ -42,6 +42,30 @@ app.post("/signup", async (req, res) => {
   });
 });
 
-app.get("/getDepositeAddress/:userId", (req, res) => {});
+app.get("/getDepositeAddress/:userId", (req, res) => {
+  const userId = req.params.userId;
+  
+  client.query(
+    "SELECT depositAddress FROM users WHERE id = $1",
+    [userId]
+  )
+    .then(result => {
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const depositAddress = result.rows[0].depositAddress;
+      console.log(depositAddress);
+      
+      res.json({
+        userId,
+        depositAddress
+      });
+    })
+    .catch(error => {
+      console.error("Error fetching deposit address:", error);
+      res.status(500).json({ error: "Internal server error" });
+    });
+});
 
 app.listen(3000);
