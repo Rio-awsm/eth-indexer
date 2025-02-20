@@ -1,0 +1,1 @@
+export const MNEUMONICS = "accept apple award along ample ancient ally alert always arrive ahead assist"
